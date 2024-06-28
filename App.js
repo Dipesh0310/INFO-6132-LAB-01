@@ -7,6 +7,7 @@ export default function App() {
 
   const handleAddTask = () => {
     if (taskTitle.trim() === '') {
+      alert('Please enter a task title.');
       return;
     }
     const newTask = {
@@ -38,6 +39,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.footer}>This app created by Dipesh_Chaudhary_1168556</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter task title"
@@ -123,6 +125,11 @@ const styles = StyleSheet.create({
   deleteButton: {
     fontSize: 24,
     color: 'red',
+    padding: 10
+  },
+  footer: {
+    fontSize: 14,
+    color: 'grey',
     padding: 10
   }
 });
