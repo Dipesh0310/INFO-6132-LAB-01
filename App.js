@@ -1,36 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, Button, FlatList, Switch, TouchableOpacity } from 'react-native';
+import { database } from './firebaseConfig'; // Ensure this path is correct
+import { ref, onValue, set, remove, update } from 'firebase/database';
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
   const [taskTitle, setTaskTitle] = useState('');
+
+  useEffect(() => {
+    const tasksRef = ref(database, 'tasks');
+    onValue(tasksRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const fetchedTasks = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
+        setTasks(fetchedTasks);
+      } else {
+        setTasks([]);
+      }
+    });
+  }, []);
 
   const handleAddTask = () => {
     if (taskTitle.trim() === '') {
       alert('Please enter a task title.');
       return;
     }
-    const newTask = {
-      id: tasks.length + 1,
+    const newTaskRef = ref(database, `tasks/${Date.now()}`);
+    set(newTaskRef, {
       title: taskTitle,
       status: 'due/false'
-    };
-    setTasks([...tasks, newTask]);
+    });
     setTaskTitle('');
   };
 
-  const toggleTaskStatus = (id) => {
-    const updatedTasks = tasks.map(task => {
-      if (task.id === id) {
-        return { ...task, status: task.status === 'due/false' ? 'done/true' : 'due/false' };
-      }
-      return task;
+  const toggleTaskStatus = (id, status) => {
+    const taskRef = ref(database, `tasks/${id}`);
+    update(taskRef, {
+      status: status === 'due/false' ? 'done/true' : 'due/false'
     });
-    setTasks(updatedTasks);
   };
 
   const deleteTask = (id) => {
-    setTasks(tasks.filter(task => task.id !== id));
+    const taskRef = ref(database, `tasks/${id}`);
+    remove(taskRef);
   };
 
   const getStatusLabel = (status) => {
@@ -68,7 +83,7 @@ export default function App() {
             <Switch
               trackColor={{ false: "lightyellow", true: "lightgreen" }}
               thumbColor={item.status === 'due/false' ? "yellow" : "green"}
-              onValueChange={() => toggleTaskStatus(item.id)}
+              onValueChange={() => toggleTaskStatus(item.id, item.status)}
               value={item.status === 'done/true'}
             />
             <Text style={styles.taskItem}>{getStatusLabel(item.status)}</Text>
