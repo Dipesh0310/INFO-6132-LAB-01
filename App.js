@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, Button, FlatList, Switch, TouchableOpacity } from 'react-native';
-import { database } from './firebaseConfig'; // Ensure this path is correct
+import { database } from './firebaseConfig';
 import { ref, onValue, set, remove, update } from 'firebase/database';
 
 export default function App() {
@@ -8,7 +8,7 @@ export default function App() {
   const [taskTitle, setTaskTitle] = useState('');
 
   useEffect(() => {
-    const tasksRef = ref(database, 'tasks');
+    const tasksRef = ref(database, 'Lab');
     onValue(tasksRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -28,7 +28,7 @@ export default function App() {
       alert('Please enter a task title.');
       return;
     }
-    const newTaskRef = ref(database, `tasks/${Date.now()}`);
+    const newTaskRef = ref(database, `Lab/${Date.now()}`);
     set(newTaskRef, {
       title: taskTitle,
       status: 'due/false'
@@ -37,14 +37,14 @@ export default function App() {
   };
 
   const toggleTaskStatus = (id, status) => {
-    const taskRef = ref(database, `tasks/${id}`);
+    const taskRef = ref(database, `Lab/${id}`);
     update(taskRef, {
       status: status === 'due/false' ? 'done/true' : 'due/false'
     });
   };
 
   const deleteTask = (id) => {
-    const taskRef = ref(database, `tasks/${id}`);
+    const taskRef = ref(database, `Lab/${id}`);
     remove(taskRef);
   };
 
